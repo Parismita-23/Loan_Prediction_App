@@ -1,0 +1,346 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+import warnings
+import streamlit as st
+print(st.__version__)
+
+train=pd.read_csv("loan_data.csv")
+
+train.columns
+train.dtypes
+
+from sklearn.model_selection import train_test_split
+
+# Load the training dataset
+input_file = "loan_data.csv"  # Specify the path to your training dataset
+df = pd.read_csv(input_file)
+
+# Split the dataset into training and test sets
+train_df, test_df = train_test_split(df, test_size=0.3, random_state=42)  # Adjust test_size as needed
+
+# Save the test set to a new CSV file
+output_file = "test_dataset.csv"  # Specify the output file name
+test_df.to_csv(output_file, index=False)
+
+print(f"Test dataset saved to {output_file}")
+
+test=pd.read_csv("test_dataset.csv")
+test.columns
+
+train.shape, test.shape
+
+#frequency table of target variable
+train['Loan_Status'].value_counts()
+train['Loan_Status'].value_counts(normalize=True)
+train['Loan_Status'].value_counts().plot.bar()
+
+plt.figure(1) 
+plt.subplot(221) 
+train['Gender'].value_counts(normalize=True).plot.bar(figsize=(20,10), title= 'Gender') 
+plt.subplot(222)
+train['Married'].value_counts(normalize=True).plot.bar(title= 'Married') 
+plt.subplot(223)
+train['Self_Employed'].value_counts(normalize=True).plot.bar(title= 'Self_Employed') 
+plt.subplot(224) 
+train['Credit_History'].value_counts(normalize=True).plot.bar(title= 'Credit_History') 
+plt.show()
+
+plt.figure(1) 
+plt.subplot(131) 
+train['Dependents'].value_counts(normalize=True).plot.bar(figsize=(24,6), title= 'Dependents') 
+plt.subplot(132)
+train['Education'].value_counts(normalize=True).plot.bar(title= 'Education') 
+plt.subplot(133) 
+train['Property_Area'].value_counts(normalize=True).plot.bar(title= 'Property_Area') 
+plt.show()
+
+plt.figure(1) 
+plt.subplot(121) 
+sns.distplot(train['ApplicantIncome']); 
+plt.subplot(122) 
+train['ApplicantIncome'].plot.box(figsize=(16,5)) 
+plt.show()
+
+train.boxplot(column='ApplicantIncome', by = 'Education') 
+plt.suptitle("")
+
+plt.figure(1) 
+plt.subplot(121) 
+sns.distplot(train['CoapplicantIncome']); 
+plt.subplot(122) 
+train['CoapplicantIncome'].plot.box(figsize=(16,5)) 
+plt.show()
+
+plt.figure(1) 
+plt.subplot(121) 
+df=train.dropna() 
+sns.distplot(df['LoanAmount']); 
+plt.subplot(122) 
+df['LoanAmount'].plot.box(figsize=(16,5)) 
+plt.show()
+
+Gender=pd.crosstab(train['Gender'],train['Loan_Status'])
+Gender.div(Gender.sum(1).astype(float), axis=0).plot(kind="bar", stacked=True, figsize=(4,4))
+
+Married=pd.crosstab(train['Married'],train['Loan_Status']) 
+Dependents=pd.crosstab(train['Dependents'],train['Loan_Status']) 
+Education=pd.crosstab(train['Education'],train['Loan_Status'])
+Self_Employed=pd.crosstab(train['Self_Employed'],train['Loan_Status']) 
+Married.div(Married.sum(1).astype(float), axis=0).plot(kind="bar", stacked=True, figsize=(4,4))
+plt.show() 
+Dependents.div(Dependents.sum(1).astype(float), axis=0).plot(kind="bar", stacked=True) 
+plt.show() 
+Education.div(Education.sum(1).astype(float), axis=0).plot(kind="bar", stacked=True, figsize=(4,4))
+plt.show() 
+Self_Employed.div(Self_Employed.sum(1).astype(float), axis=0).plot(kind="bar", stacked=True, figsize=(4,4)) 
+plt.show()
+
+Credit_History=pd.crosstab(train['Credit_History'],train['Loan_Status'])
+Property_Area=pd.crosstab(train['Property_Area'],train['Loan_Status']) 
+Credit_History.div(Credit_History.sum(1).astype(float), axis=0).plot(kind="bar", stacked=True, figsize=(4,4))
+plt.show() 
+Property_Area.div(Property_Area.sum(1).astype(float), axis=0).plot(kind="bar", stacked=True) 
+plt.show()
+
+train.groupby('Loan_Status')['ApplicantIncome'].mean().plot.bar()
+
+bins=[0,2500,4000,6000,81000] 
+group=['Low','Average','High', 'Very high'] 
+train['Income_bin']=pd.cut(train['ApplicantIncome'],bins,labels=group)
+Income_bin=pd.crosstab(train['Income_bin'],train['Loan_Status'])
+Income_bin.div(Income_bin.sum(1).astype(float), axis=0).plot(kind="bar", stacked=True) 
+plt.xlabel('ApplicantIncome') 
+P = plt.ylabel('Percentage')
+
+bins=[0,1000,3000,42000] 
+group=['Low','Average','High']
+train['Coapplicant_Income_bin']=pd.cut(train['CoapplicantIncome'],bins,labels=group)
+Coapplicant_Income_bin=pd.crosstab(train['Coapplicant_Income_bin'],train['Loan_Status']) 
+Coapplicant_Income_bin.div(Coapplicant_Income_bin.sum(1).astype(float), axis=0).plot(kind="bar", stacked=True) 
+plt.xlabel('CoapplicantIncome')
+P = plt.ylabel('Percentage')
+
+train['Total_Income']=train['ApplicantIncome']+train['CoapplicantIncome']
+bins=[0,2500,4000,6000,81000] 
+group=['Low','Average','High', 'Very high']
+train['Total_Income_bin']=pd.cut(train['Total_Income'],bins,labels=group)
+Total_Income_bin=pd.crosstab(train['Total_Income_bin'],train['Loan_Status'])
+Total_Income_bin.div(Total_Income_bin.sum(1).astype(float), axis=0).plot(kind="bar", stacked=True)
+plt.xlabel('Total_Income') 
+P = plt.ylabel('Percentage')
+
+bins=[0,100,200,700]
+group=['Low','Average','High'] 
+train['LoanAmount_bin']=pd.cut(train['LoanAmount'],bins,labels=group)
+LoanAmount_bin=pd.crosstab(train['LoanAmount_bin'],train['Loan_Status']) 
+LoanAmount_bin.div(LoanAmount_bin.sum(1).astype(float), axis=0).plot(kind="bar", stacked=True) 
+plt.xlabel('LoanAmount')
+P = plt.ylabel('Percentage')
+
+train=train.drop(['Income_bin', 'Coapplicant_Income_bin', 'LoanAmount_bin', 'Total_Income_bin', 'Total_Income'], axis=1)
+train['Dependents'].replace('3+', 3,inplace=True) 
+test['Dependents'].replace('3+', 3,inplace=True)
+train['Loan_Status'].replace('N', 0,inplace=True)
+train['Loan_Status'].replace('Y', 1,inplace=True)
+
+# Compute correlation matrix using only numeric columns
+matrix = train.select_dtypes(include=['number']).corr()
+
+# Plot the heatmap
+f, ax = plt.subplots(figsize=(9, 6))
+sns.heatmap(matrix, vmax=.8, square=True, cmap="BuPu", annot=True)
+
+plt.title("Heatmap of Correlation Matrix")
+plt.show()
+
+train.isnull().sum()
+
+train['Gender'].fillna(train['Gender'].mode()[0], inplace=True)
+train['Married'].fillna(train['Married'].mode()[0], inplace=True) 
+train['Dependents'].fillna(train['Dependents'].mode()[0], inplace=True) 
+train['Self_Employed'].fillna(train['Self_Employed'].mode()[0], inplace=True) 
+train['Credit_History'].fillna(train['Credit_History'].mode()[0], inplace=True)
+
+train['Loan_Amount_Term'].value_counts()
+train['Loan_Amount_Term'].fillna(train['Loan_Amount_Term'].mode()[0], inplace=True)
+train['LoanAmount'].fillna(train['LoanAmount'].median(), inplace=True)
+train.isnull().sum()
+
+test['Gender'].fillna(train['Gender'].mode()[0], inplace=True)
+test['Dependents'].fillna(train['Dependents'].mode()[0], inplace=True) 
+test['Self_Employed'].fillna(train['Self_Employed'].mode()[0], inplace=True)
+test['Credit_History'].fillna(train['Credit_History'].mode()[0], inplace=True) 
+test['Loan_Amount_Term'].fillna(train['Loan_Amount_Term'].mode()[0], inplace=True) 
+test['LoanAmount'].fillna(train['LoanAmount'].median(), inplace=True)
+
+train['LoanAmount_log'] = np.log(train['LoanAmount']) 
+train['LoanAmount_log'].hist(bins=20) 
+test['LoanAmount_log'] = np.log(test['LoanAmount'])
+
+train['Total_Income']=train['ApplicantIncome']+train['CoapplicantIncome'] 
+test['Total_Income']=test['ApplicantIncome']+test['CoapplicantIncome']
+
+sns.distplot(train['Total_Income']);
+
+train['Total_Income_log'] = np.log(train['Total_Income']) 
+sns.distplot(train['Total_Income_log']); 
+test['Total_Income_log'] = np.log(test['Total_Income'])
+
+train['EMI']=train['LoanAmount']/train['Loan_Amount_Term']
+test['EMI']=test['LoanAmount']/test['Loan_Amount_Term']
+sns.distplot(train['EMI']);
+
+train['Balance Income']=train['Total_Income']-(train['EMI']*1000)
+sns.distplot(train['Balance Income']);
+
+train=train.drop(['ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term'], axis=1) 
+test=test.drop(['ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term'], axis=1)
+train=train.drop('Loan_ID',axis=1) 
+test=test.drop('Loan_ID',axis=1)
+
+# Separate features and target
+X = train.drop('Loan_Status', axis=1)  # Corrected the argument
+y = train['Loan_Status']  # Proper way to select a column
+
+X=pd.get_dummies(X) 
+train=pd.get_dummies(train) 
+test=pd.get_dummies(test)
+
+from sklearn import tree
+from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import accuracy_score
+
+# a cross validation Decision Tree model with stratified 5 folds and make predictions for test dataset.
+i=1 
+kf = StratifiedKFold(n_splits=5,random_state=3,shuffle=True) 
+accuracy_list = []
+for train_index,test_index in kf.split(X,y):
+    print('\n{} of kfold {}'.format(i,kf.n_splits))   
+    xtr,xvl = X.loc[train_index],X.loc[test_index]     
+    ytr,yvl = y[train_index],y[test_index]         
+    model = tree.DecisionTreeClassifier(random_state=1)     
+    model.fit(xtr, ytr)     
+    pred_test = model.predict(xvl)     
+    score = accuracy_score(yvl,pred_test) 
+    accuracy_list.append(score)
+    print('accuracy_score',score)     
+    i+=1 
+
+mean_accuracy = sum(accuracy_list)/ len(accuracy_list)
+print(mean_accuracy)
+
+import streamlit as st
+import joblib
+import numpy as np
+
+# Load model and scaler
+model = joblib.load('loan_eligibility_model.pkl')
+scaler = joblib.load('scaler.pkl')
+
+st.title("Loan Eligibility Prediction")
+
+# Collect user input
+income = st.number_input('Applicant Income')
+coapplicant_income = st.number_input('Co-applicant Income')
+loan_amount = st.number_input('Loan Amount')
+loan_term = st.number_input('Loan Term (in months)')
+credit_history = st.selectbox('Credit History', [0, 1])
+dependents = st.number_input('Dependents (0, 1, 2, 3)')
+
+# Button to predict
+if st.button("Predict"):
+    features = np.array([income, coapplicant_income, loan_amount, loan_term, credit_history, dependents]).reshape(1, -1)
+    features_scaled = scaler.transform(features)
+    prediction = model.predict(features_scaled)
+    result = "Eligible" if prediction[0] == 1 else "Not Eligible"
+    st.write(f"Loan Prediction: {result}")
+
+
+# import joblib
+# import numpy as np
+
+# # Load the model and scaler
+# model = joblib.load('loan_eligibility_model.pkl')
+# scaler = joblib.load('scaler.pkl')
+
+# def predict_loan(features):
+#     # Preprocess features
+#     features = np.array(features).reshape(1, -1)
+#     features_scaled = scaler.transform(features)
+    
+#     # Predict and return result
+#     prediction = model.predict(features_scaled)
+#     return "Eligible" if prediction == 1 else "Not Eligible"
+
+
+# from sklearn.preprocessing import StandardScaler
+# import joblib
+
+# # Initialize the scaler
+# scaler = StandardScaler()
+
+# # Fit and transform the training data
+# X_scaled = scaler.fit_transform(X)
+
+# # Train your model with the scaled data
+# model = tree.DecisionTreeClassifier(random_state=1)
+# model.fit(X_scaled, y)
+
+# # Save the trained model and scaler
+# joblib.dump(model, 'Loan_prediction.pkl')
+# joblib.dump(scaler, 'scaler.pkl')  # Save the scaler for future use
+
+# from flask import Flask, request, jsonify
+# import joblib
+# import numpy as np
+
+# # Load the model and scaler
+# model = joblib.load('Loan_prediction.pkl')
+# scaler = joblib.load('scaler.pkl')
+
+# # Initialize Flask app
+# app = Flask(__name__)
+
+# @app.route('/predict', methods=['POST'])
+# def predict():
+#     # Get data from the request
+#     data = request.json
+    
+#     # Convert data to DataFrame
+#     input_data = np.array([
+#         data['Gender'], data['Married'], data['Education'], data['Self_Employed'], 
+#         data['LoanAmount'], data['Loan_Amount_Term'], data['Credit_History'], 
+#         data['Property_Area'], data['Total_Income'], 
+#         data.get('Dependents_1', 0), data.get('Dependents_2', 0), data.get('Dependents_3+', 0)
+#     ]).reshape(1, -1)
+    
+#     # Scale the input data
+#     scaled_data = scaler.transform(input_data)
+    
+#     # Predict
+#     prediction = model.predict(scaled_data)
+    
+#     # Return the result
+#     result = 'Eligible' if prediction[0] == 1 else 'Not Eligible'
+#     return jsonify({'Loan Status': result})
+
+# from flask import Flask, request, render_template
+
+# app = Flask(__name__)
+
+# @app.route('/')
+# def home():
+#     return "Welcome to Loan Prediction App!"
+
+# # if __name__ == "__main__":
+# #     app.run()
+
+# # # Run the app
+# # if __name__ == '__main__':
+# #     app.run(debug=True)
+# from waitress import serve
+
+# if __name__ == "__main__":
+#     serve(app, host='0.0.0.0', port=8080)
